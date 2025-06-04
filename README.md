@@ -1,2 +1,16 @@
-# kafka_project
+# Kafka Project
 A Python-based Kafka producer and consumer setup with Docker containers and Anaconda for environment management.
+
+# Technologies used
+- Python
+- Kafka
+- Docker Desktop
+- Anaconda
+
+# Project Structure
+- producer.py
+- consumer.py
+- config.py
+- compose.yaml
+- Dockerfile
+- required.txt
