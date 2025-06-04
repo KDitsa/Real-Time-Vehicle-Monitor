@@ -1,0 +1,4 @@
+KAFKA_BROKER = "kafka:29092"
+TOPIC_NAME = "topic1"
+GROUP_ID = "group1"
+KAFKA_VERSION = (2,8,1)
