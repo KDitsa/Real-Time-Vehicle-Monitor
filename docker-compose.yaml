@@ -45,6 +45,22 @@ services:
             interval: 10s
             retries: 5
             timeout: 10s
+    grafana:
+        image: grafana/grafana-oss:latest
+        restart: unless-stopped
+        environment:
+            GF_DATABASE_TYPE: postgres
+            GF_DATABASE_HOST: timescaledb:5432
+            GF_DATABASE_NAME: vehicle_db
+            GF_DATABASE_USER: postgres
+            GF_DATABASE_PASSWORD: password
+        ports:
+            - "3000:3000"
+        volumes:
+            - grafana-storage:/var/lib/grafana
+        depends_on:
+            timescaledb:
+                condition: service_healthy
     producer:
         build: .
         depends_on:
@@ -76,3 +92,5 @@ services:
             TIMESCALEDB_USER: postgres
             TIMESCALEDB_PASSWORD: password
             TIMESCALEDB_DB: vehicle_db
+volumes:
+    grafana-storage:
