@@ -46,7 +46,18 @@ def insert_vehicle_data(cur,data):
         print("Inserted successfully.",flush=True)
     except Exception as e:
         print(f"Insertion failed: {e}",flush=True)
-        
+
+def show_vehicle_data(cur,limit=5):
+    try:
+        cur.execute("SELECT * FROM vehicle_data ORDER BY timestamp DESC LIMIT %s",(limit,))
+        rows = cur.fetchall()
+        print("\n Latest entries:")
+        for row in rows:
+            print (row)
+        print("-"*50)
+    except Exception as e:
+        print(f"Error while fetching entries: {e}",flush=True)
+
 def main():
     db_conn = connect_db()
     if db_conn is None:
@@ -76,6 +87,7 @@ def main():
                 if data:
                     print(f'Receiving message... {datetime.now()} | Topic: {message.topic}, Partition: {message.partition}, Offset:{message.offset} | Message : {data}',flush=True)
                     insert_vehicle_data(cur,data)
+                    show_vehicle_data(cur)
             sleep(10)
     except KafkaError as e:
         print(f'Kafka error: {e}')
