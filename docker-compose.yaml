@@ -3,12 +3,18 @@ services:
         image: wurstmeister/zookeeper:latest
         environment:
             ZOOKEEPER_CLIENT_PORT: 2181
+        healthcheck:
+            test: nc -z localhost 2181 || exit -1
+            interval: 10s
+            retries: 5
+            timeout: 10s
     kafka:
         image: wurstmeister/kafka:latest
         ports:
             - "9092:9092"
         depends_on:
-            - zookeeper
+            zookeeper:
+                condition: service_healthy
         environment:
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -17,6 +23,11 @@ services:
             KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT
             KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+        healthcheck:
+            test: kafka-topics.sh --bootstrap-server localhost:9092 --list || exit -1
+            interval: 10s
+            retries: 5
+            timeout: 10s
     timescaledb:
         image: timescale/timescaledb:latest-pg16
         volumes:
@@ -37,7 +48,8 @@ services:
     producer:
         build: .
         depends_on:
-            - kafka
+            kafka:
+                condition: service_healthy
         working_dir: /app
         command: python producer.py
         environment:
@@ -51,7 +63,7 @@ services:
         restart: always
         depends_on:
             kafka:
-                condition: service_started
+                condition: service_healthy
             timescaledb: 
                 condition: service_healthy
         working_dir: /app
