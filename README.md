@@ -86,10 +86,31 @@ To provide real-time observability, Grafana is integrated directly into the Dock
 - Dashboards: Custom dashboards visualize key metrics such as vehicle speed, temperature trends, humidity levels, and location traces over time.
 - Alerting: Grafana alerts are configured for threshold conditions (e.g., speed > 120 km/h, temperature > 80°C). These alerts are delivered through a webhook contact point that notifies a local HTTP endpoint.
 
+![Vehicle 1 Bar Chart Dashboard](images/vehicle_1_barchart.png)
+*Figure: Grafana bar chart dashboard visualizing telemetry from Vehicle 1 — speed (green), temperature (yellow), and humidity (blue) — over time.*
+
+![Vehicle 1 Time Series Dashboard](images/vehicle_1_timeseries.png)
+*Figure: Grafana time series dashboard visualizing telemetry from Vehicle 1 — speed (green), temperature (yellow), and humidity (blue) — over time.*
+
+![Vehicle 1 Dashboard](images/vehicle_1_temperature_speed_and_humidity.png)
+*Figure: Grafana dashboard for Vehicle 1 displaying key telemetry metrics — speed (green), temperature (yellow), and humidity (blue) — over time.*
+
+![All Vehicle Dashboard](images/temperature_status_of_all_vehicles.png)
+*Figure: Comparative temperature trends of four vehicles displayed on a single Grafana time-series plot.*
+
 ---
 
 ### 🚨 Alerting via Webhook
 Grafana allows the creation of alert rules that continuously evaluate query results against predefined thresholds. When a metric breaches a threshold condition, Grafana triggers an alert. Grafana supports webhook contact points — HTTP endpoints that receive alert notifications as JSON payloads via POST requests.
+
+![All Vehicle Speed Alert Dashboard](images/speed_status_of_all_vehicles.png)
+*Figure: Speed alerts for all vehicles, highlighting instances where speed thresholds were exceeded.*
+
+![Vehicle 1 Temperature Alert Dashboard](images/vehicle_1_temperature_alert.png)
+*Figure: Multiple temperature alerts from Vehicle 1 displayed over time; the highlighted alert triggered on 2025-06-14 at 15:24:30 indicates an abnormal event.*
+
+![Webhook Temperature Alert](images/webhook_alert.png)
+*Figure: Webhook payload displaying alert notification details sent from Grafana upon threshold breach.*
 
 ---
 
