@@ -6,3 +6,4 @@ A Python-based Kafka producer and consumer setup with Docker containers and Anac
 - Kafka
 - Docker Desktop
 - Anaconda
+- TimescaleDB

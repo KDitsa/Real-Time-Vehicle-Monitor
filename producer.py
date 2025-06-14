@@ -1,39 +1,40 @@
-from kafka import KafkaProducer
 import json
 import time
-import random
 import string
+import socket
 from datetime import datetime
-
+from kafka import KafkaProducer
 from config import KAFKA_BROKER, TOPIC_NAME, KAFKA_VERSION
-
-# create random message
-def generate_message():
-    random_user_id = random.choice(list(range(1,1000)))
-    random_recipient_id = random.choice(list(range(1,1000)))
-    message = ''.join(random.choices(string.ascii_letters + string.digits,k=50))
-    return {
-        'user-id': random_user_id,
-        'recipient-id': random_recipient_id,
-        'message': message
-    }
+from vehicle_data import generate_vehicle_data
 
 # serialize data: converting to JSON string and encode into bytes
 def serializer(message):
     return json.dumps(message).encode('utf-8')
     
-# creating instance of KafkaProducer class
-# bootstrap_servers parameter identifies kafka broker address that producer will connect to
-producer = KafkaProducer(
-    bootstrap_servers=[KAFKA_BROKER],
-    api_version=KAFKA_VERSION,
-    value_serializer=serializer
-)
+def main():
+    try:
+        vehicle_id = socket.gethostname()
+        # creating instance of KafkaProducer class
+        producer = KafkaProducer(
+            bootstrap_servers=[KAFKA_BROKER],
+            api_version=KAFKA_VERSION,
+            value_serializer=serializer
+        )
+        print('Producer initialized successfully...')
+    except Exception as e:
+        print(f"Failed to initialize kafka producer {e}",flush=True)
+        return
+    #send message
+    while True:
+        send_message = generate_vehicle_data(vehicle_id)
+        print(f'Sending message... {datetime.now()} | Message = {str(send_message)}',flush=True)
+        future = producer.send(TOPIC_NAME,send_message)
+        try:
+            record_data = future.get(timeout=10)
+            print(f"Message sent to {record_data.topic} partition {record_data.partition} offset {record_data.offset}",flush=True)
+        except Exception as e:
+            print(f"failed to send message {e}",flush=True)
+        time.sleep(60)
 
-#send message
-for i in range(6):
-    send_message = generate_message()
-    print(f'Sending message... {datetime.now()} | Message = {str(send_message)}',flush=True)
-    producer.send(TOPIC_NAME,send_message)
-    sleep_time = random.randint(1,11)
-    time.sleep(sleep_time)
+if __name__ == "__main__":
+    main()
