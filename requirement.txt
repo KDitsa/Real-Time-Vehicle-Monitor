@@ -1,2 +1,2 @@
 kafka-python
-psycopg2-binary
+cassandra-driver

@@ -8,6 +8,7 @@ services:
             interval: 10s
             retries: 5
             timeout: 10s
+        mem_limit: 384m
     kafka:
         image: wurstmeister/kafka:latest
         ports:
@@ -24,43 +25,41 @@ services:
             KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
         healthcheck:
-            test: kafka-topics.sh --bootstrap-server localhost:9092 --list || exit -1
+            test: kafka-topics.sh --bootstrap-server kafka:29092 --list || exit -1
             interval: 10s
             retries: 5
             timeout: 10s
-    timescaledb:
-        image: timescale/timescaledb:latest-pg16
-        volumes:
-            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-        environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: password
-            POSTGRES_DB: vehicle_db
-            LANG: en_US.utf8
-            LC_ALL: en_US.utf8
+        mem_limit: 1g
+    cassandra:
+        image: cassandra:latest
         ports:
-            - "5432:5432"
+            - "9042:9042"
+        volumes:
+            - cassandra-data:/var/lib/cassandra
+        environment:
+            MAX_HEAP_SIZE: 1024M
+            HEAP_NEWSIZE: 256M
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U postgres -d vehicle_db"]
-            interval: 10s
-            retries: 5
+            test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
+            interval: 20s
             timeout: 10s
-    grafana:
-        image: grafana/grafana-oss:latest
-        restart: unless-stopped
-        environment:
-            GF_DATABASE_TYPE: postgres
-            GF_DATABASE_HOST: timescaledb:5432
-            GF_DATABASE_NAME: vehicle_db
-            GF_DATABASE_USER: postgres
-            GF_DATABASE_PASSWORD: password
-        ports:
-            - "3000:3000"
-        volumes:
-            - grafana-storage:/var/lib/grafana
+            retries: 10
+        mem_limit: 2.3g
+    cassandra-init:
+        image: cassandra:latest
         depends_on:
-            timescaledb:
+            cassandra: 
                 condition: service_healthy
+        volumes:
+            - ./init.cql:/init.cql
+        entrypoint: >
+            bash -c "
+                until cqlsh cassandra 9042 --request-timeout=60 -e 'DESCRIBE KEYSPACES'; do
+                    echo 'Waiting for Cassandra to be ready...';
+                    sleep 10;
+                done;
+                cqlsh cassandra 9042 --request-timeout=60 -f /init.cql
+            "
     producer:
         build: .
         depends_on:
@@ -71,7 +70,6 @@ services:
         environment:
             KAFKA_BROKER: kafka:29092
             KAFKA_TOPIC: vehicle_data
-            
         deploy:
             replicas: 4
     consumer:
@@ -80,17 +78,12 @@ services:
         depends_on:
             kafka:
                 condition: service_healthy
-            timescaledb: 
-                condition: service_healthy
+            cassandra-init:
+                condition: service_completed_successfully
         working_dir: /app
         command: python consumer.py
         environment:
             KAFKA_BROKER: kafka:29092
             KAFKA_TOPIC: vehicle_data
-            TIMESCALEDB_HOST: timescaleDB
-            TIMESCALEDB_PORT: 5432
-            TIMESCALEDB_USER: postgres
-            TIMESCALEDB_PASSWORD: password
-            TIMESCALEDB_DB: vehicle_db
 volumes:
-    grafana-storage:
+  cassandra-data:
