@@ -78,3 +78,59 @@ The integration and setup went smoothly without any major issues. Minor challeng
 ### Closing Notes
 This week focused on **data visualization and alerting**, enhancing observability of kafka pipeline. The system is now more robust in terms of monitoing and operational visibility. Further refinements will continue in the upcoming weeks.
 
+
+
+
+## Week-3
+### Objectives completed
+- **Replaced TimescaleDB with Apache Cassandra** as the primary data store for vehicle telemetry data.
+- Updated **kafka consumer service to write data into Cassandra** instead of timescaleDB
+- Began implementing **data export** functionality for analytics and reporting use cases.
+- Studied **Data Lake and Data Warehouse** concepts to better understand long-term data architecture design.
+
+---
+
+### Implementation Summary
+#### Cassandra Integration:
+- Replaced TimescaleDB with **Apache Cassandra**.
+- Refactored database schema and created a new table with
+    - **Partition Key**: `vehicle_id`
+    - **Clustering Key**: `timestamp` (ordered DESC)
+- Replaced init.sql used with TimescaleDB by `init.cql` script
+- Introduced a dedicated **cassandra-init service** to:
+    - Wait for Cassandra readiness.
+    - Check that the target keyspace and table exist before consumer begins writing.
+
+#### Kafka Consumer Update:
+- Refactored the consumer logic to support Cassandra integration using the updated schema.
+- Ensured full alignment with init.cql definitions, including keyspace and table structure.
+- Conducted integration testing with multiple producer containers to validate ingestion across multiple vehicle streams.
+
+#### Branching Strategy:
+- Created a new feature branch: **cassandra-migration** to preserve the fully working TimescaleDB implementation on main.
+- Made all necessary changes for Cassandra integration within this new branch, ensuring TimescaleDB remains unaffected.
+
+#### Additional Learning & Future Considerations
+- Studied the concepts and differences between Data Lakes and Data Warehouses.
+- Exploring how these architectures could be integrated to support scalable data storage and advanced analytics.
+- Insights gained will inform future decisions on designing robust, long-term data storage and processing solutions.
+
+---
+
+### Issues faced and Workarounds
+#### 1. Data Export Failing via Cassandra Exporter
+- **Problem:** Attempted to enable metrics/data export using **bitnami/cassandra_exporter** and **criteord/cassandra_exporter**. The exporter frequently fails to start, either:
+    - Hangs indefinitely, or
+    - Crashes with an error: `Scraper stopped due to uncaught exception: Failed to retrieve RMIServer stub...`
+- **Status:** Unresolved. Issue appears related to JMX or RMI misconfiguration within the containerized Cassandra environment. Investigating exporter configurations and possible use of alternative metric exporters or custom scrapers.
+
+#### 2. Cassandra Container Memory Limits
+- **Problem:** The Cassandra container was repeatedly crashing due to insufficient memory allocation, especially during initial data ingestion.
+- **Workaround:** Increased memory allocation in Docker settings and adjusted Cassandra’s JVM_OPTS to reduce heap usage. System stability has improved post-configuration.
+
+---
+
+### Closing Notes
+This week centered on migrating from TimescaleDB to Apache Cassandra, updating the Kafka consumer logic, and laying the groundwork for data export and monitoring. The primary challenge encountered is unstable export functionality due to issues with the Cassandra exporter, which currently hinders reliable data scraping and monitoring.
+
+Despite these challenges, the migration is progressing steadily. Once these export issues are resolved, we plan to integrate Prometheus for metrics collection and Grafana for visualization to fully restore and enhance monitoring capabilities.
