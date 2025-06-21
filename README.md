@@ -21,8 +21,8 @@ This project is fully containerized and requires only Docker for setup and execu
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/vehicle-telemetry-monitoring.git
-cd vehicle-telemetry-monitoring
+git clone https://github.com/KDitsa/Real-Time-Vehicle-Monitor.git
+cd Real-Time-Vehicle-Monitor
 
 # Build and launch all services
 docker-compose up --build
