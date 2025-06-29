@@ -134,3 +134,73 @@ This week focused on **data visualization and alerting**, enhancing observabilit
 This week centered on migrating from TimescaleDB to Apache Cassandra, updating the Kafka consumer logic, and laying the groundwork for data export and monitoring. The primary challenge encountered is unstable export functionality due to issues with the Cassandra exporter, which currently hinders reliable data scraping and monitoring.
 
 Despite these challenges, the migration is progressing steadily. Once these export issues are resolved, we plan to integrate Prometheus for metrics collection and Grafana for visualization to fully restore and enhance monitoring capabilities.
+
+## Week-4
+### Objectives Completed
+- Conducted a comprehensive study on modern data storage architectures: **Data Lakes, Data Warehouses, and Data Lakehouses**.
+- Prepared a detailed **presentation (PPT)** covering architecture, tools, benefits and challenges including a comparative analysis.
+- Explored **ETL vs ELT paradigms** and their role in data pipeline strategies.
+- Built foundational knowledge to inform future integration of scalable long-term storage and analytical layers into the Kafka-based data pipeline.
+
+---
+
+### Key Learnings & Presentation Highlights
+#### Core Topics Covered in the Presentation:
+  - **Overview of Data Lake**
+    - **Centralized** repository to store **structured, semi-structured, and unstructured data in native format**.
+    - **Top 7 Data Lake Tools:**
+        1. Amazon S3 & AWS Lake Formation
+        2. Databricks Lakehouse (Delta Lake)
+        3. Microsoft Azure Data Lake Storage (ADLS)
+        4. Google Cloud Storage & BigLake
+        5. Snowflake Data Cloud
+        6. Apache Iceberg
+        7. Dremio Lakehouse Platform
+    - Outlined the **Data Lake Architecture** including
+        1. Data Sources
+        2. Data Ingestion
+        3. Data Storage & Processing
+        4. Analytical Sandboxes
+        5. Data Consumption
+        6. Governance, Security and Monitoring
+    - **SWOT Analysis** to show Strength, Weakness, Opportunity and Threats of using Data Lake.
+  - **Overview of Data Warehouse**
+    - Optimized for storing and querying **structured, cleansed, and transformed data**.
+    - **Top 7 Data Warehouse Tools:**
+        1. Snowflake
+        2. Azure Synapse Analytics
+        3. Google BigQuery
+        4. Amazon Redshift
+        5. IBM Db2 Warehouse
+        6. Oracle Autonomous Data Warehouse
+        7. Firebolt Cloud Data Warehouse
+    - Covered **architectural tiers** (single, two-tier, three-tier).
+    - Discussed **Data Marts (dependent, independent, hybrid)** for departmental analytics.
+    - Explained **Challenges and Benefits of using Data Warehouse**.
+  - **Compared traditional ETL pipelines with modern ELT workflows**, highlighting trade-offs in speed, cost, and privacy.
+  - Introduced the **Lakehouse paradigm** — combining the best of both Data Lakes (flexibility) and Data Warehouses (reliability). Described benefits like **unified storage, reduced data duplication and compatibility with real-time analytics**.
+
+#### Relevance to Ongoing Project:
+- Insights from the presentation directly support **architectural decisions for the Kafka pipeline project**.
+- Will help determine the **end-to-end architecture** for monitoring the vehicles.
+
+#### Project Status:
+This week’s focus was research and understanding. No new feature branches created; output was knowledge consolidation. The findings will influence implementation choices in upcoming weeks.
+
+---
+
+### Challenges Faced and How They Were Addressed
+#### 1. Grasping Clear Conceptual Differences Between Architectures
+- **Challenge:** Initially, it was difficult to clearly differentiate between Data Lakes, Data Warehouses, and Lakehouses — especially in terms of architecture, purpose, and use cases. Many overlapping definitions and tool-specific implementations made it confusing.
+- **Approach Taken:** Addressed this by consulting multiple **high-quality resources, whitepapers, and technical blogs**. Focused on breaking down each architecture layer-by-layer, which helped develop a deep, contextual understanding.
+
+#### 2. Consolidating Extensive Information into a Concise and Coherent Presentation
+- **Challenge:** Gathering data from various sources and distilling it into a single, well-structured file was challenging. It was easy to get overwhelmed by the breadth and detail available.
+- **Approach Taken:** Tackled this by **prioritizing foundational concepts** first, then layering advanced ideas on top. Grouped topics logically and focused the content on clarity, relevance, and flow for the intended audience.
+
+---
+
+### Closing Notes
+This week was centered on **deep research and understanding**, resulting in a well-structured presentation covering modern data architectures. Significant progress was made in understanding the evolving ecosystem around Data Lakes and Warehouses, and documenting these insights for future use.
+
+Next steps will involve **designing an architectural diagram for the full end-to-end pipeline**. This **visual blueprint** will help align the technical implementation with business goals and provide a clearer overview of the real-world scenario.
