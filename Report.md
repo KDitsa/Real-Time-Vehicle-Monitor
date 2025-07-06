@@ -204,3 +204,126 @@ This week’s focus was research and understanding. No new feature branches crea
 This week was centered on **deep research and understanding**, resulting in a well-structured presentation covering modern data architectures. Significant progress was made in understanding the evolving ecosystem around Data Lakes and Warehouses, and documenting these insights for future use.
 
 Next steps will involve **designing an architectural diagram for the full end-to-end pipeline**. This **visual blueprint** will help align the technical implementation with business goals and provide a clearer overview of the real-world scenario.
+
+## Week-5
+### Objectives Completed
+- Designed a complete end-to-end **architecture diagram** for the Kafka-based vehicle telemetry pipeline.
+- Developed an **initial version** using **AWS and Azure** managed services for ETL, storage, data lake, and visualization.
+- Incorporated **feedback from mentor**, identifying cost and complexity issues with the initial design.
+- Based on this, created a **revised architecture** using only **open-source and self-hosted tools**.
+- All services were **containerized using Docker** for consistent deployment.
+
+---
+
+### Architecture Layer Flow Overview
+
+```
+Data Generation Layer → Kafka Streaming Layer → Storage Layer → Visualization & Alerting Layer → ETL and Data Warehouse Layer → Analytics Layer
+```
+
+---
+
+### Initial Architecture Overview (Cloud-Dependent Version)
+![Initial Architecture Diagram](images/Diagram1.png)
+#### **1. Data Generation Layer**
+- Simulated vehicle telemetry data includes:
+  - `location`, `temperature`, `speed`, `humidity`
+- Data flows from **sensors → edge devices**.
+- Edge devices enrich the data with `timestamp` and `vehicle_id`.
+- Data is sent to the **Kafka Producer**.
+- Example JSON payload:
+  ```json
+  {
+    "vehicle_id": "VH001",
+    "timestamp": "2025-07-06T12:00:00Z",
+    "latitude": 37.7749,
+    "longitude": -122.4194,
+    "speed": 65,
+    "temperature": 28.5,
+    "humidity": 60
+  }
+  ```
+
+#### **2. Kafka Streaming Layer**
+- **Kafka Broker** receives JSON payload from Kafka Producer and stores it in the appropriate **topic**.
+- **Kafka Consumer** subscribes to the topic and consumes data for downstream processing.
+
+#### **3. Storage Layer**
+- **TimescaleDB** stores **structured time-series data** (optimized for queries over time).
+- **Apache Cassandra** stores **wide-column event data**, scalable for high-ingestion rates.
+- **AWS Lake Formation** serves as the **Data Lake** which is built on top of **Amazon S3**:
+  - Ingests raw and semi-structured data (via Kafka Connect or batch loaders).
+  - Provides metadata management, fine-grained access control, and data cataloging.
+
+#### **4. Visualization & Alerting Layer**
+- **Cassandra Exporter** exposes internal Cassandra metrics via HTTP endpoints.
+- **Amazon Managed Prometheus** scrapes those metrics periodically.
+- **Azure Managed Grafana** is used to:
+  - Visualize data from **TimescaleDB** and **Prometheus**.
+  - Create real-time operational dashboards.
+- **Alertmanager** used for rule-based alerting.
+  - Notifications are sent via:
+    - Email  
+    - Slack  
+    - Microsoft Teams  
+    - SMS  
+    - Webhooks
+
+#### **5. ETL and Data Warehouse Layer**
+- **AWS Glue** handles core ETL operations (transformations, data cleaning, and loading).
+- Tool-specific assignments:
+  - **Apache NiFi** – handles **data extraction** from various sources.
+  - **Apache Flink** – designed for **stream transformations and loading**.
+  - **Apache Airflow** – used to **orchestrate ETL pipelines** and scheduling.
+- **Amazon Redshift** serves as the **Data Warehouse** for:
+  - Structured analytics
+  - OLAP queries
+  - Departmental reporting
+
+#### **6. Analytics & Machine Learning Layer**
+- Data is extracted from the Data Warehouse for **feature engineering and model development**.
+- Model development done in **Google Colab**.
+- Trained models are registered and deployed via **Batch or Real-time Inference Engine**.
+- Inference outputs stored in a **Prediction Store**.
+- **Power BI** used for:
+  - Visualizing predictions
+  - Business-level reporting
+  - Feeding decision signals back into **Alertmanager** when needed
+
+---
+
+### Known Issues with the Initial Architecture (Based on Mentor Feedback)
+- **Use of Costly Cloud Services:** Reliance on AWS (S3, Redshift, Glue) and Azure (Grafana) made the architecture expensive and less suitable for long-term or academic use.
+- **Mixed Cloud Providers:** Combining AWS and Azure increased architectural complexity, integration effort, and operational overhead.
+- **Vendor Lock-In:** Use of managed services tightly coupled the architecture to specific cloud platforms, limiting portability and flexibility.
+
+---
+
+### Redesigned Architecture Overview (Open Source & Self-Hosted)
+![Final Architecture Diagram](images/Diagram2.png)
+- Kafka Producers sent data to Kafka Brokers, coordinated by **Zookeeper** and Kafka Consumers processed data and passed it to downstream systems.
+- **MinIO** served as an S3-compatible **self-hosted Data Lake**.
+- **Apache NiFi** replaced AWS Glue for ETL workflows.
+- **Apache Druid** replaced Redshift, serving as a real-time analytics warehouse.
+- **Metabase** replaced Power BI for business intelligence and dashboarding.
+- Every component (**Kafka Producer**, **Kafka Broker**, **Zookeeper**, **Kafka Consumer**, **TimescaleDB**, **Cassandra**, **Cassandra Exporter**, **Grafana**, **Prometheus**, and **Alertmanager**) was **Dockerized**, supporting consistent deployment and development environments without cloud dependencies.
+
+---
+
+### Challenges Faced and Solutions
+#### 1. Visualizing Complex Systems
+- **Challenge:** Maintaining readability of the architecture diagram given multiple layers and tools.
+- **Solution:** Structured the layout into logical layers, with minimal cross-layer overlaps and consistent labeling.
+
+#### 2. Tool Replacement and Compatibility
+- **Challenge:** Mapping cloud-native services to reliable open-source equivalents.
+- **Solution:** Selected tools like NiFi, MinIO, and Druid based on community support, feature set, and suitability for local deployment.
+
+---
+
+### Closing Notes
+
+This week was focused entirely on designing a robust, scalable architecture for the vehicle data pipeline. The initial version helped define all functional blocks, but mentor feedback highlighted concerns around cloud cost and complexity. In response, a second, open-source-based version was built to be vendor-neutral and deployment-friendly.
+
+Additionally, a preliminary exploration of **Apache Flink** was started this week to assess its relevance for real-time stream processing. Its integration will be considered in future weeks based on feasibility and use cases.
+
