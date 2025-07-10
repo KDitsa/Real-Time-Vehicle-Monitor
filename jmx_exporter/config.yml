@@ -1,7 +1,16 @@
 startDelaySeconds: 0
+lowercaseOutputName: true
+lowercaseOutpuLabelNames: true
+whitelistObjectNames:
+  - "org.apache.cassandra.metrics:*"
+  - "java.lang:type=Memory"
+  - "java.lang:type=OperatingSystem"
 rules:
   - name: java_lang_OperatingSystem_ProcessCpuLoad
     pattern: 'java.lang<type=OperatingSystem><.*>ProcessCpuLoad: .*'
   
   - name: java_lang_Memory_HeapMemoryUsage_$1
     pattern: 'java.lang<type=Memory><HeapMemoryUsage>(.+): .*'  
+
+  - pattern: 'org\.apache\.cassandra\.metrics<type=(\w+), name=(\w+)><>Value'
+    name: cassandra_$1_$2_metrics

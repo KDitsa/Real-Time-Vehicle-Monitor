@@ -30,6 +30,7 @@ services:
             retries: 5
             timeout: 10s
         mem_limit: 1g
+        restart: on-failure
     cassandra:
         build: 
             context: ./jmx_exporter
@@ -41,7 +42,6 @@ services:
             - cassandra-data:/var/lib/cassandra
         environment:
             MAX_HEAP_SIZE: 1024M
-            HEAP_NEWSIZE: 256M
         healthcheck:
             test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
             interval: 20s
