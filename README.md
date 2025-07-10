@@ -51,7 +51,7 @@ docker-compose down -v
 ## 🖥️ System Architecture
 The system consists of five major components:
 1. **Kafka Producers** – Simulate telemetry data for each vehicle.
-2. **Kafka Consumer** – Processes and forwards incoming data to TimescaleDB.
+2. **Kafka Consumer** – Processes and forwards incoming data to Apache Cassandra.
 3. **Apache Cassandra** – Distributed, scalable NoSQL database for time-series-style telemetry data.
 4. **Prometheus Exporter (Java Agent)** – A JMX-based exporter installed on Cassandra to expose JVM metrics such as heap memory usage, process cpu load, complete tasks, live data size and so on.
 5. **Prometheus** – Scrapes and visualizes system and application metrics for monitoring with the help of exporter.
@@ -100,6 +100,19 @@ Prometheus is configured to:
 
 The Prometheus Java Agent is installed during Docker image builds using `wget` and `maven`. The agent exposes application metrics at a `/metrics` endpoint, which Prometheus regularly scrapes.
 
+#### 📊 Sample Metrics Output from Prometheus
+
+Below are example visualizations of JVM metrics exposed by Cassandra:
+
+![Heap Memory Usage](images/java_lang_memory_heapmemoryusage_used.png)
+*Figure: Cassandra Heap Memory usage over time*
+
+![Process_CPU_Load](images/java_lang_operatingsystem_processcpuload.png)
+*Figure: Cassandra Process CPU Load over time*
+
+![Mem_Table_Columns_Count](images/cassandra_table_memtablecolumnscount_metrics.png)
+*Figure: Cassandra MemTable Columns Count metric over time*
+
 ---
 
 ### 🌿 Isolated Development with Git Branching
@@ -136,7 +149,7 @@ All services — Kafka, Zookeeper, Cassandra, Prometheus, producer(s), and consu
 - **📦 Message Queue Optimization**: Introduce Kafka Streams or Flink for real-time data transformations.
 
 ## 📝 Closing Thoughts
-This project demonstrates how a robust end-to-end telemetry pipeline can be built using open-This project presents a scalable, containerized architecture for real-time telemetry ingestion and monitoring. By integrating **Kafka**, **Apache Cassandra**, and **Prometheus**, it shows how high-throughput data can be reliably handled and made observable.
+This project presents a scalable, containerized architecture for real-time telemetry ingestion and monitoring. By integrating **Kafka**, **Apache Cassandra**, and **Prometheus**, it shows how high-throughput data can be reliably handled and made observable.
 
 The removal of TimescaleDB and Grafana reflects a shift toward scalable, modular components. Cassandra provides distributed data persistence, while Prometheus enables system-level introspection with minimal overhead.
 
