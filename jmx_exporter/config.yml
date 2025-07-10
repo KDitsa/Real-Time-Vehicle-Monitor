@@ -1,0 +1,7 @@
+startDelaySeconds: 0
+rules:
+  - name: java_lang_OperatingSystem_ProcessCpuLoad
+    pattern: 'java.lang<type=OperatingSystem><.*>ProcessCpuLoad: .*'
+  
+  - name: java_lang_Memory_HeapMemoryUsage_$1
+    pattern: 'java.lang<type=Memory><HeapMemoryUsage>(.+): .*'  

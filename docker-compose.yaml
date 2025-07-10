@@ -31,9 +31,12 @@ services:
             timeout: 10s
         mem_limit: 1g
     cassandra:
-        image: cassandra:latest
+        build: 
+            context: ./jmx_exporter
+            dockerfile: Dockerfile
         ports:
             - "9042:9042"
+            - "8080:8080"
         volumes:
             - cassandra-data:/var/lib/cassandra
         environment:
@@ -60,6 +63,18 @@ services:
                 done;
                 cqlsh cassandra 9042 --request-timeout=60 -f /init.cql
             "
+    prometheus:
+        image: prom/prometheus:latest
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        command: --config.file=/etc/prometheus/prometheus.yml
+        depends_on:
+            cassandra:
+                condition: service_healthy
+        mem_limit: 384m
+        cpus: 1.0
     producer:
         build: .
         depends_on:
