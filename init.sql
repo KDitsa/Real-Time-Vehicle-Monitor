@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS vehicle_data(
     speed DOUBLE PRECISION,
     temperature DOUBLE PRECISION,
     humidity DOUBLE PRECISION,
-    timestamp TIMESTAMPTZ NOT NULL
+    timestamp TIMESTAMP NOT NULL
     );
 -- convert table into hypertable partitioned by timestamp
 SELECT create_hypertable('vehicle_data', 'timestamp', if_not_exists => TRUE);

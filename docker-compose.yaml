@@ -45,22 +45,6 @@ services:
             interval: 10s
             retries: 5
             timeout: 10s
-    grafana:
-        image: grafana/grafana-oss:latest
-        restart: unless-stopped
-        environment:
-            GF_DATABASE_TYPE: postgres
-            GF_DATABASE_HOST: timescaledb:5432
-            GF_DATABASE_NAME: vehicle_db
-            GF_DATABASE_USER: postgres
-            GF_DATABASE_PASSWORD: password
-        ports:
-            - "3000:3000"
-        volumes:
-            - grafana-storage:/var/lib/grafana
-        depends_on:
-            timescaledb:
-                condition: service_healthy
     producer:
         build: .
         depends_on:
@@ -74,23 +58,48 @@ services:
             
         deploy:
             replicas: 4
-    consumer:
-        build: .
-        restart: always
+    jobmanager:
+        build:
+            context: ./flink_jobs
+            dockerfile: Dockerfile
+        ports:
+            - "8081:8081"
+        command: >
+            /bin/bash -c "
+                /docker-entrypoint.sh jobmanager &
+                sleep 10 &&
+                flink run -py /opt/flink/flink.py
+            "
         depends_on:
-            kafka:
-                condition: service_healthy
-            timescaledb: 
-                condition: service_healthy
-        working_dir: /app
-        command: python consumer.py
+            - kafka
+            - timescaledb
         environment:
+            FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
             KAFKA_BROKER: kafka:29092
             KAFKA_TOPIC: vehicle_data
-            TIMESCALEDB_HOST: timescaleDB
-            TIMESCALEDB_PORT: 5432
-            TIMESCALEDB_USER: postgres
-            TIMESCALEDB_PASSWORD: password
-            TIMESCALEDB_DB: vehicle_db
-volumes:
-    grafana-storage:
+            GROUP_ID: group1
+            EDB_HOST: timescaleDB
+            DB_PORT: 5432
+            DB_USER: postgres
+            DB_PASSWORD: password
+            DB_DB: vehicle_db
+            DB_TABLE: vehicle_data
+        cpus: 0.5
+        mem_limit: 1024m
+    taskmanager:
+        build:
+            context: ./flink_jobs
+            dockerfile: Dockerfile
+        depends_on:
+            - jobmanager
+        command: taskmanager
+        links:
+            - "jobmanager:jobmanager"
+        environment:
+            - |
+              FLINK_PROPERTIES=
+              jobmanager.rpc.address: jobmanager
+              taskmanager.numberOfTaskSlots: 2
+        cpus: 0.75
+        mem_limit: 1024m
+        restart: on-failure

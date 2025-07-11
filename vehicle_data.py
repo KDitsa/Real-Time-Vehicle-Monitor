@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timezone
+import datetime,time
 
 # create random information about vehicles
 def generate_vehicle_data(v_id):
@@ -10,5 +10,5 @@ def generate_vehicle_data(v_id):
         'speed': round(random.uniform(0,200),2),
         'temperature': round(random.uniform(50,150),2),
         'humidity': round(random.uniform(10,90),2),
-        'timestamp': datetime.now(timezone.utc).isoformat()
+        'timestamp': datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%dT%H:%M:%S')[:-3]
     }
