@@ -327,3 +327,71 @@ This week was focused entirely on designing a robust, scalable architecture for 
 
 Additionally, a preliminary exploration of **Apache Flink** was started this week to assess its relevance for real-time stream processing. Its integration will be considered in future weeks based on feasibility and use cases.
 
+## **Week-6**
+
+### **Objectives Completed**
+
+* Successfully integrated **Apache Flink** into the pipeline to consume real-time Kafka telemetry data and write it to **TimescaleDB**.
+* Fixed **JMX configuration** issues to enable **Prometheus-based metric scraping from Cassandra**.
+* Updated the **overall architecture** to reflect Flink as the new stream processing engine between Kafka and TimescaleDB.
+
+---
+
+#### **Architecture Update**
+
+* The new pipeline now flows:
+
+  ```
+  Kafka Producer → Kafka Broker → Apache Flink → TimescaleDB
+  ```
+
+---
+### **Implementation Summary**
+
+#### **Apache Flink Integration**
+
+* Implemented a **Flink job** (via `flink.py`) to read telemetry data from **Kafka** and write records into **TimescaleDB**.
+* Set up a **custom Dockerfile** to install **PyFlink**, required **JARs**, and system-level packages.
+* Ensure Flink jobs can be submitted and executed from within the container.
+* Configured Flink **job manager** and **task manager** as services in `docker-compose.yml`.
+
+#### **JMX Integration for Cassandra**
+
+* Enabled **JMX ports** and configured **`jmx_prometheus_javaagent`** in the Cassandra container.
+* Prometheus is now able to **scrape JVM metrics** such as memory usage, GC stats, and thread count from Cassandra.
+
+---
+
+### **Issues Faced and Workarounds**
+
+#### 1. Flink Job Not Processing Data
+
+* **Problem:** Flink connected to Kafka, but no data was processed initially.
+* **Solution:** Resolved by correcting topic names, setting Kafka consumer group ID, and adjusting data types.
+
+#### 2. Missing Dependencies in Flink Container
+
+* **Problem:** Required Python and Java dependencies were missing in the default Flink container.
+* **Solution:** Built a custom **Flink Docker image** including:
+
+  * **PyFlink**
+  * Necessary **Flink and JDBC JARs**
+  * Required Python libraries for PostgreSQL connection and JSON parsing.
+
+#### 3. Flink Job Execution from Python
+
+* **Problem:** `flink run` was not executing the job properly from within the container.
+* **Solution:** Used command in `docker-compose.yml` to ensure that `flink.py` gets submitted automatically after Flink components start.
+
+#### 4. Cassandra Metrics Still Not Exposed Initially
+
+* **Problem:** Even after adding `jmx_prometheus_javaagent`, metrics were not visible in Prometheus.
+* **Solution:** Verified JMX port exposure, added the proper `jmx_exporter.yml`, and confirmed Prometheus target endpoint. Updated Dockerfile to copy agent JAR correctly.
+
+---
+
+### **Closing Notes**
+
+This week marked a major technical milestone with the successful **implementation of Apache Flink as the stream processing layer** in the pipeline. Despite initial hurdles with Flink job submission and Kafka connectivity, a stable, Dockerized setup was achieved. In parallel, **Cassandra’s observability was enhanced** by enabling JMX metrics export, allowing full integration with Prometheus and Grafana. The **updated architecture** now reflects a scalable, real-time data processing and storage pipeline with proper monitoring.
+
+Overall, the project demonstrates a robust, production-aligned design, ready to be extended with real IoT devices, cloud deployment, and machine learning capabilities.
