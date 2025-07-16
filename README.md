@@ -13,7 +13,9 @@ The Flink runtime consists of two types of processes: a **JobManager** and **one
 - The TaskManagers (also called workers) **execute the tasks of a dataflow, and buffer and exchange the data streams**. There must always be at least one TaskManager. The smallest unit of resource scheduling in a TaskManager is a **task slot**. The number of task slots in a TaskManager indicates the number of concurrent processing tasks. 
 
 Flink has a rich set of APIs using which developers can perform transformations on both **batch and real-time data**. A variety of transformations includes **mapping, filtering, sorting, joining, grouping and aggregating**. These transformations by Apache Flink are performed on **distributed data**.
+
 ![Flink Image](images/apache_flink.png)
+
 *Figure: Apache Flink abstraction layers, from low-level Stateful Stream Processing to high-level Flink SQL, showing increasing ease of use and abstraction.*
 - At the lowest level is the **Stateful Stream Processing**, which is part of the DataStream API. These are primitive building blocks capable of implementing almost any operation by directly manipulating Flink's state backends and timer services. At this level, code is written that reacts to each event as it arrives, one at a time.
 - The **DataStream API**, while including Stateful Stream Processing, generally operates at a slightly higher level of abstraction. It provides building blocks like streams and windows, offering more structured ways to process data.
