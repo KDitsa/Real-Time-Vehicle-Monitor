@@ -1,4 +1,43 @@
-# Real-Time Vehicle Telemetry Monitoring System
+# 🚘 Real-Time Vehicle Telemetry Monitoring System
+
+## 🧩 Problem Statement
+
+In the era of connected and autonomous vehicles, real-time telemetry plays a vital role in ensuring operational efficiency, safety, compliance, and predictive diagnostics. Each vehicle in a modern fleet continuously emits streams of data such as location, speed, engine temperature, fuel consumption, and environmental conditions.
+
+Traditional monolithic databases struggle under the scale and complexity of such data. The goal of this project is to explore and prototype a modular vehicle telemetry system that can eventually support:
+
+- 🚀 High-throughput data ingestion from multiple concurrent sources
+- 🗃️ Scalable and time-efficient storage for querying historical telemetry data
+- ⚙️ Stream processing and complex event handling via Apache Flink or Kafka Streams
+- 📈 Real-time observability and threshold-based alerting
+- 🧪 Simulation environments for testing various driving and fault scenarios
+- 📡 Support for standard protocols (e.g., MQTT, HTTP, WebSocket) for broader IoT compatibility
+- 🗺️ Geospatial mapping and route visualization using location-based telemetry
+- 🧭 Integration with real-world GPS/GPRS data from IoT-enabled vehicles
+- 🧠 Extensibility for AI/ML-driven analytics such as anomaly detection or predictive maintenance
+- 🌐 Secure and reliable edge-to-cloud communication (e.g., over MQTT or cellular)
+- 🔐 End-to-end encryption, authentication, and access control for secure telemetry pipelines
+- 🧱 Multi-tenancy support for managing fleets of vehicles across different clients or use cases
+- 📦 Efficient data archiving, compression, and retention policies for long-term storage
+
+> 🔍 While the current system demonstrates the ingestion, storage, and visualization of real-time telemetry data, these points outline the broader vision for what such a system can evolve into.
+
+---
+
+## 📂 Project Structure and Branch Strategy
+
+To allow modular experimentation and evolution of the system, this project is split across multiple Git branches. The following table summarizes the branches and their respective goals:
+
+| **Branch**              | **Purpose**                                                                                                                                              |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `main`                  | Implements the core system using **Kafka**, **TimescaleDB**, and **Grafana** for real-time telemetry ingestion, storage, and visualization.              |
+| `cassandra-migration`   | Migrates backend storage from TimescaleDB to **Apache Cassandra**. Also integrates **Prometheus** with a **JMX Prometheus Java Agent** for JVM metrics scraping. This branch emphasizes horizontal scalability and high write throughput. |
+| `flink-integration`     | Replaces the traditional Kafka consumer with **Apache Flink** to enable real-time stream processing, including windowed aggregations and complex event processing. |
+
+> 🛠️ Each branch is fully containerized and self-contained. You can switch between them to explore different architectural patterns and technologies used in telemetry data pipelines.
+
+---
+
 ## 📘 Overview
 This project implements a real-time vehicle telemetry monitoring system that ingests, stores, visualizes, and monitors data streams from multiple simulated vehicles. It is built using Apache Kafka, TimescaleDB, and Grafana, all orchestrated through Docker. The goal is to simulate real-world IoT telemetry workflows with observability, alerting, and scalability in mind.
 
@@ -132,11 +171,12 @@ All services — Kafka, Zookeeper, TimescaleDB, Grafana, producer(s), and consum
 ---
 
 ## ⚠️ Challenges Encountered
-| Issue               | Description                                        | Resolution                                     |
-|---------------------|--------------------------------------------------|-----------------------------------------------|
-| Docker on Windows   | Services failed to start reliably after reboots  | Switched to Linux environment for stable container support |
-| TimescaleDB startup delays | Consumers would crash on startup if DB wasn't ready | Added health checks and auto-retry with `restart: always` |
-| Docker signal handling | Cleanup logic didn’t execute during shutdown    | Currently under investigation                  |
+
+| Issue                   | Description                                               | Resolution                                                                 |
+|--------------------------|-----------------------------------------------------------|----------------------------------------------------------------------------|
+| Docker on Windows        | Services failed to start reliably after reboots           | Switched to Linux environment for stable container support                |
+| TimescaleDB startup delays | Consumers would crash on startup if DB wasn't ready       | Added health checks and auto-retry with `restart: always`                |
+| Docker signal handling   | Cleanup logic didn’t execute during shutdown              | Docker handles termination with `SIGTERM` followed by `SIGKILL`. For improved reliability, custom signal handling can be added in the application to ensure graceful shutdowns. |
 
 ## 🔮 Further Improvements and Future Directions
 - Migrate storage to Apache Cassandra for scalable, distributed time-series data handling, and adopt Prometheus for comprehensive monitoring, alerting, and performance metrics.
