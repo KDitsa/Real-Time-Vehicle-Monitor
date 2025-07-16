@@ -161,15 +161,15 @@ To ensure clean and modular development, the integration with Apache Flink was c
 
 The current implementation provides a lightweight, modular base for real-time stream processing using Kafka and Apache Flink. The system can be extended with the following enhancements to make it more robust, intelligent, and production-ready:
 
-- **Windowed Aggregations and Event-Time Processing:** Use Flink's time-based operators to calculate moving averages, detect outliers, or trigger alerts based on historical patterns.
-- **Persistent Storage Integration:** Add TimescaleDB, PostgreSQL, or Apache Cassandra to store telemetry data for long-term retention and analysis.
-- **Grafana Dashboards:** Integrate Grafana to visualize trends (speed, temperature, etc.) and configure alert rules for threshold breaches.
-- **Real-Time Data from Physical Vehicles:** Replace simulated data with actual GPS/GPRS telemetry collected from connected vehicle hardware or APIs.
-- **Geospatial Analytics and Mapping:** Implement route tracking, heatmaps, and regional insights by overlaying telemetry on maps.
-- **Edge Device Integration:** Enable telemetry ingestion from IoT-enabled vehicle devices using MQTT, HTTPS, or cellular networks for real-time connectivity.
-- **Expanded Telemetry Metrics:** Include additional signals like fuel levels, tire pressure, engine diagnostics, and battery health for comprehensive monitoring.
-- **AI/ML-Based Intelligence:** Apply machine learning models for predictive maintenance, driving behavior scoring, or anomaly detection in vehicle telemetry.
-- **Security Enhancements:** Add end-to-end encryption (TLS), secure authentication, and fine-grained access control to protect data in transit and at rest.
+- **⏱️ Windowed Aggregations and Event-Time Processing:** Use Flink's time-based operators to calculate moving averages, detect outliers, or trigger alerts based on historical patterns.
+- **💾 Persistent Storage Integration:** Add TimescaleDB, PostgreSQL, or Apache Cassandra to store telemetry data for long-term retention and analysis.
+- **📊 Grafana Dashboards:** Integrate Grafana to visualize trends (speed, temperature, etc.) and configure alert rules for threshold breaches.
+- **🚗 Real-Time Data from Physical Vehicles:** Replace simulated data with actual GPS/GPRS telemetry collected from connected vehicle hardware or APIs.
+- **🗺️ Geospatial Analytics and Mapping:** Implement route tracking, heatmaps, and regional insights by overlaying telemetry on maps.
+- **🌐 Edge Device Integration:** Enable telemetry ingestion from IoT-enabled vehicle devices using MQTT, HTTPS, or cellular networks for real-time connectivity.
+- **📈 Expanded Telemetry Metrics:** Include additional signals like fuel levels, tire pressure, engine diagnostics, and battery health for comprehensive monitoring.
+- **🧠 AI/ML-Based Intelligence:** Apply machine learning models for predictive maintenance, driving behavior scoring, or anomaly detection in vehicle telemetry.
+- **🔐 Security Enhancements:** Add end-to-end encryption (TLS), secure authentication, and fine-grained access control to protect data in transit and at rest.
 
 ## 📝 Closing Thoughts
 
