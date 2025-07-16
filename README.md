@@ -63,7 +63,7 @@ Once initialized:
 - It consumes incoming JSON messages, parses them into structured fields (vehicle ID, location, speed, temperature, etc.).
 - Flink prints each parsed record to the console using `print()` to verify successful ingestion and transformation.
 
-> Note: The initial startup may take 1–2 minutes as Kafka, Zookeeper, and Flink services complete their health checks. Flink will only start processing once Kafka is fully ready and the required JAR files are loaded.
+> ⏳ Note: The initial startup may take 1–2 minutes as Kafka, Zookeeper, and Flink services complete their health checks. Flink will only start processing once Kafka is fully ready and the required JAR files are loaded.
 
 ---
 
