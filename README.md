@@ -24,6 +24,17 @@ Traditional monolithic databases struggle under the scale and complexity of such
 
 ---
 
+## 🏗️ System Architecture Overview
+
+To better understand how the different components of the system interact, the following diagram provides a high-level view of the end-to-end telemetry pipeline — from data simulation to storage, monitoring, alerting, and analysis.
+
+It illustrates the flow of telemetry data, supporting services, and how observability is integrated into the overall system.
+
+![System Architecture Diagram](images/vehicle.png)
+*Figure: Architectural diagram of the Real-Time Vehicle Telemetry Monitoring System showcasing the complete data flow.*
+
+---
+
 ## 📂 Project Structure and Branch Strategy
 
 To allow modular experimentation and evolution of the system, this project is split across multiple Git branches. The following table summarizes the branches and their respective goals:
