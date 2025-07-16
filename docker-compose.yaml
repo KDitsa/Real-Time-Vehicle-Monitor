@@ -28,23 +28,6 @@ services:
             interval: 10s
             retries: 5
             timeout: 10s
-    timescaledb:
-        image: timescale/timescaledb:latest-pg16
-        volumes:
-            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-        environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: password
-            POSTGRES_DB: vehicle_db
-            LANG: en_US.utf8
-            LC_ALL: en_US.utf8
-        ports:
-            - "5432:5432"
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U postgres -d vehicle_db"]
-            interval: 10s
-            retries: 5
-            timeout: 10s
     producer:
         build: .
         depends_on:
@@ -72,18 +55,10 @@ services:
             "
         depends_on:
             - kafka
-            - timescaledb
         environment:
-            FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
-            KAFKA_BROKER: kafka:29092
-            KAFKA_TOPIC: vehicle_data
-            GROUP_ID: group1
-            EDB_HOST: timescaleDB
-            DB_PORT: 5432
-            DB_USER: postgres
-            DB_PASSWORD: password
-            DB_DB: vehicle_db
-            DB_TABLE: vehicle_data
+            - |
+              FLINK_PROPERTIES=
+              jobmanager.rpc.address: jobmanager
         cpus: 0.5
         mem_limit: 1024m
     taskmanager:
@@ -99,7 +74,7 @@ services:
             - |
               FLINK_PROPERTIES=
               jobmanager.rpc.address: jobmanager
-              taskmanager.numberOfTaskSlots: 2
+              taskmanager.numberOfTaskSlots: 4
         cpus: 0.75
         mem_limit: 1024m
         restart: on-failure
