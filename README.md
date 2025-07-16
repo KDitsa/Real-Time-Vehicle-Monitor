@@ -1,9 +1,20 @@
-# 🚘 Real-Time Vehicle Telemetry Monitoring System
+# 🚘 Real-Time Vehicle Telemetry Monitoring System – Cassandra Migration Edition
 ## 📘 Overview
-This project implements a real-time vehicle telemetry monitoring system that ingests, stores, visualizes, and monitors data streams from multiple simulated vehicles. It is built using Kafka, Apache Cassandra, and Prometheus, all orchestrated through Docker. The goal is to simulate real-world IoT telemetry workflows with observability, alerting, and scalability in mind.
+This branch of the project focuses on migrating the vehicle telemetry storage backend **from TimescaleDB** (a time-series relational database) **to Apache Cassandra**, a distributed NoSQL database optimized for high-write throughput and horizontal scalability. The system continues to simulate real-time telemetry data from multiple vehicles using Kafka, and ingests that data for long-term storage and analysis.
 
-## 🎯 Motivation
-In a world of connected vehicles and intelligent transportation systems, real-time telemetry is critical for performance monitoring, predictive maintenance, and safety analysis. This project explores how modern data pipelines and observability stacks can be leveraged to handle high-throughput vehicle data reliably and efficiently.
+## 🎯 Motivation: Why Switch to Apache Cassandra?
+The original implementation used **TimescaleDB** for time-series data storage. While TimescaleDB offers SQL familiarity and PostgreSQL integration, it revealed limitations when scaled under high-ingest workloads. Apache Cassandra addresses these challenges with a distributed, write-optimized design.
+
+| **Aspect**              | **TimescaleDB Limitation**                                              | **Cassandra Advantage**                                                   |
+|-------------------------|--------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| **Scalability**         | Difficult to scale horizontally without complex setup                   | Linear horizontal scalability across commodity hardware                   |
+| **Write Performance**   | Slower under high-ingest workloads without tuning                       | Designed for high-throughput writes with minimal tuning                   |
+| **Availability**        | Can have single points of failure without HA configuration              | Peer-to-peer architecture with no single point of failure                 |
+| **Schema Flexibility**  | Relational model can become restrictive as data evolves                 | Flexible NoSQL schema suits changing telemetry formats                    |
+| **Fault Tolerance**     | Requires external tools for replication and failover                    | Built-in replication and automatic failover                              |
+| **Operational Overhead**| Complex configuration for HA, clustering, and backups                   | Simpler scaling and management in distributed environments                |
+
+> 🚀 Apache Cassandra provides a more robust foundation for real-time vehicle telemetry systems that demand high availability, performance, and scale.
 
 ## ⚙️ Getting Started
 
@@ -27,12 +38,12 @@ cd Real-Time_Vehicle-Monitor
 # Build and launch all services
 docker-compose up --build
 ```
-Once initialized:
-- Kafka producers begin simulating and publishing vehicle telemetry data.
-- The consumer ingests this data and stores it in Apache Cassandra.
-- Prometheus starts scraping metrics from exporters and Java applications via the Java Agent.
+Once the system is initialized:
+- Kafka producers start simulating and publishing real-time vehicle telemetry data to a Kafka topic.
+- The Kafka consumer subscribes to the topic, processes the incoming data, and stores it in Apache Cassandra.
+- Prometheus begins scraping system and JVM-level metrics from the configured exporters and Java applications using the Prometheus Java Agent.
 
-> Note: The initial startup may take 1–2 minutes while services pass their health checks and dependencies initialize.
+> ⏳ Note: The initial startup may take 1–2 minutes while services pass their health checks and dependencies initialize.
 
 ---
 
@@ -50,15 +61,15 @@ docker-compose down -v
 
 ## 🖥️ System Architecture
 The system consists of five major components:
-1. **Kafka Producers** – Simulate telemetry data for each vehicle.
+1. **Kafka Producers** – Simulate vehicle telemetry data.
 2. **Kafka Consumer** – Processes and forwards incoming data to Apache Cassandra.
 3. **Apache Cassandra** – Distributed, scalable NoSQL database for time-series-style telemetry data.
 4. **Prometheus Exporter (Java Agent)** – A JMX-based exporter installed on Cassandra to expose JVM metrics such as heap memory usage, process cpu load, complete tasks, live data size and so on.
-5. **Prometheus** – Scrapes and visualizes system and application metrics for monitoring with the help of exporter.
+5. **Prometheus** – Scrapes system metrics and visualizes performance.
 6. **Docker** – Handles the orchestration of all services.
 
 ## 🔄 Data Flow Summary
-Vehicle Simulation (Producer) --> Kafka Topic --> Kafka Consumer --> Cassandra --> Exporter --> Prometheus 
+Vehicle Simulation (Producer) --> Kafka Topic --> Kafka Consumer --> Cassandra --> JMX Exporter --> Prometheus 
 
 ## 🛠️ Implementation Journey
 ### 🚗 Simulating Vehicles with Kafka Producers
@@ -75,21 +86,20 @@ Kafka producers were containerized using Docker, with four separate containers r
 
 ### 📥 Real-Time Ingestion – Kafka Consumer
 A Python-based Kafka consumer subscribes to the same topic and continuously listens for incoming messages. On message receipt, it:
-- Parses the incoming JSON payload
-- Stores it into a Cassandra table using an optimized schema for querying by vehicle and time range
-
-Cassandra is well-suited for scalable and distributed write-heavy telemetry workloads.
+- Parses each JSON message
+- Writes data into Apache Cassandra
+- Uses a time- and vehicle-centric schema optimized for queries by `vehicle_id` and `timestamp`
 
 ---
 
 ### 💾 Storage with Apache Cassandra
 Apache Cassandra provides:
 
-- High availability with no single point of failure
-- Linear scalability for write-heavy telemetry workloads
 - A flexible schema to store time-series vehicle data efficiently
+- Linear scalability for write-heavy telemetry workloads
+-  High availability with no single point of failure
 
-Cassandra’s distributed architecture makes it ideal for high-ingest, geographically distributed deployments.
+The schema is initialized using a `cassandra-init` service that runs `init.cql`.
 
 ---
 
@@ -98,7 +108,7 @@ Prometheus is configured to:
 - Scrape JVM-level metrics (e.g. heap memory usage, garbage collection, thread activity) from Apache Cassandra using the Prometheus JMX Java Agent.
 - Monitor the health and performance of core infrastructure components like Cassandra.
 
-The Prometheus Java Agent is installed during Docker image builds using `wget` and `maven`. The agent exposes application metrics at a `/metrics` endpoint, which Prometheus regularly scrapes.
+The Prometheus Java Agent is installed during the Docker image build process using `wget` to download the agent and maven to manage dependencies. It exposes application metrics at the `/metrics` endpoint, which Prometheus regularly scrapes.
 
 #### 📊 Sample Metrics Output from Prometheus
 
@@ -133,20 +143,20 @@ All services — Kafka, Zookeeper, Cassandra, Prometheus, producer(s), and consu
 
 ## ⚠️ Challenges Encountered
 
-| Issue                    | Description                                                                                     | Resolution                                                                                             |
-|--------------------------|-------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| Docker on Windows        | Services failed to start reliably after system reboots.                                         | Switched to a Linux environment for more stable container orchestration and volume handling.           |
-| Cassandra startup delays | Consumers would crash on startup if the Cassandra keyspace wasn't ready.                        | Added health checks and a `cassandra-init` service to ensure `init.cql` runs and creates the keyspace if it doesn't exist. |
-| Metric visibility        | Prometheus could not scrape Cassandra metrics directly, as Dropwizard metrics are not exposed.  | Installed the `jmx_prometheus_javaagent` via Dockerfile to expose JVM metrics through JMX.            |
+| **Issue**                 | **Description**                                                                                  | **Resolution**                                                                                          |
+|--------------------------|--------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| Docker on Windows         | Services failed to start reliably after system reboots.                                          | Switched to a Linux environment for more stable container orchestration and volume handling.             |
+| Cassandra Initialization  | Kafka consumer failed if the Cassandra keyspace wasn’t created.                                 | Added a `cassandra-init` service and health checks to ensure the keyspace is created before consuming.   |
+| Metric Visibility         | Prometheus could not scrape Cassandra metrics directly, as Dropwizard metrics are not exposed.  | Installed the `jmx_prometheus_javaagent` via Dockerfile to expose JVM metrics through JMX.               |
 
 ## 🔮 Further Improvements and Future Directions
 
+- **📦 Message Queue Optimization**: Introduce Kafka Streams or Flink for real-time data transformations.
 - **🧭 Reintroduce Grafana** for visual dashboards using Prometheus as a data source.
 - **📍 Real-world GPS/GPRS data**: Replace simulation with actual telemetry from IoT-enabled vehicles.
-- **🛡️ Security**: Introduce TLS, authentication, and role-based access to secure telemetry pipelines.
 - **🌐 Geospatial Analysis**: Add mapping interfaces for route tracking, zone alerts, and geo-fencing.
 - **🧠 AI/ML Integration**: Perform predictive maintenance, anomaly detection, and behavior analytics.
-- **📦 Message Queue Optimization**: Introduce Kafka Streams or Flink for real-time data transformations.
+- **🛡️ Security**: Introduce TLS, authentication, and role-based access to secure telemetry pipelines.
 
 ## 📝 Closing Thoughts
 This project presents a scalable, containerized architecture for real-time telemetry ingestion and monitoring. By integrating **Kafka**, **Apache Cassandra**, and **Prometheus**, it shows how high-throughput data can be reliably handled and made observable.
